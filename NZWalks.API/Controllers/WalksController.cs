@@ -31,4 +31,46 @@ public class WalksController(IWalkRepository walkRepository, IMapper mapper) : C
         var walks = mapper.Map<List<WalkDto>>(walkDomainModel);
         return Ok(walks);
     }
+    
+    //Get Walk by Id
+    [HttpGet]
+    [Route("{id:Guid}")]
+    public async Task<IActionResult> GetWalkById([FromRoute] Guid id)
+    {
+        var walkDomainModel = await walkRepository.GetWalkByIdAsync(id);
+        if (walkDomainModel == null)
+            return NotFound();
+        //Map the domain model to Dto
+        var walk = mapper.Map<WalkDto>(walkDomainModel);
+        return Ok(walk);
+    }
+    
+    //Update Walk By Id
+    [HttpPut]
+    [Route("{id:Guid}")]
+    public async Task<IActionResult> Update([FromRoute] Guid id, UpdateWalkRequestDto updateWalkRequestDto)
+    {
+        //Map to domain model
+        var walkDomainModel = mapper.Map<Walk>(updateWalkRequestDto);
+        walkDomainModel = await walkRepository.UpdateAsync(id, walkDomainModel);
+        if (walkDomainModel == null)
+            return NotFound();
+        //Map Domain Model to Dto
+        var walk = mapper.Map<WalkDto>(walkDomainModel);
+        return Ok(walk);
+
+    }
+    
+    //Delete by Id
+    [HttpDelete]
+    [Route("{id:Guid}")]
+    public async Task<IActionResult> Delete([FromRoute] Guid id)
+    {
+        var deletedWalkDomainModel = await walkRepository.DeleteAsync(id);
+        if (deletedWalkDomainModel == null)
+            return NotFound();
+        //Map the Domain mode to Dto
+        var deletedWalk = mapper.Map<WalkDto>(deletedWalkDomainModel);
+        return Ok(deletedWalk);
+    }
 }
