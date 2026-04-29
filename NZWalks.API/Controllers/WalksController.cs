@@ -25,10 +25,11 @@ public class WalksController(IWalkRepository walkRepository, IMapper mapper) : C
     }
 
     //Get All Walks
+    //Get: //api/walks?filterOn=name&filterQuery=Track
     [HttpGet]
-    public async Task<IActionResult> GetAllWalks()
+    public async Task<IActionResult> GetAllWalks([FromQuery] string? filterOn, [FromQuery]  string? filterQuery)
     {
-        var walkDomainModel = await walkRepository.GetAllWalkAsync();
+        var walkDomainModel = await walkRepository.GetAllWalkAsync(filterOn, filterQuery);
         //Map the Domain Model to Dto
         var walks = mapper.Map<List<WalkDto>>(walkDomainModel);
         return Ok(walks);
