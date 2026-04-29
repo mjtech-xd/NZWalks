@@ -25,12 +25,13 @@ public class WalksController(IWalkRepository walkRepository, IMapper mapper) : C
     }
 
     //Get All Walks
-    //Get: //api/walks?filterOn=name&filterQuery=Track&sortBy=name&isAscending=true
+    //Get: //api/walks?filterOn=name&filterQuery=Track&sortBy=name&isAscending=true&pageNumber=1&pageSize=10
     [HttpGet]
     public async Task<IActionResult> GetAllWalks([FromQuery] string? filterOn, [FromQuery]  string? filterQuery,
-    [FromQuery] string? sortBy, [FromQuery] bool? isAscending)
+    [FromQuery] string? sortBy, [FromQuery] bool? isAscending, [FromQuery] int pageNumber = 1, [FromQuery] int pageSize = 10)
     {
-        var walkDomainModel = await walkRepository.GetAllWalkAsync(filterOn, filterQuery, sortBy, isAscending ?? true);
+        var walkDomainModel = await walkRepository.GetAllWalkAsync(filterOn, filterQuery, sortBy, isAscending ?? true,
+            pageNumber, pageSize);
         //Map the Domain Model to Dto
         var walks = mapper.Map<List<WalkDto>>(walkDomainModel);
         return Ok(walks);
