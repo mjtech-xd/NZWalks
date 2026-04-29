@@ -15,7 +15,8 @@ public class WalkRepository(NZWalksDbContext dbContext) : IWalkRepository
         return walk;
     }
 
-    public async Task<List<Walk>> GetAllWalkAsync(string? filterOn =null, string? filterQuery = null)
+    public async Task<List<Walk>> GetAllWalkAsync(string? filterOn = null, string? filterQuery = null, string? sortBy = null,
+        bool isAscending = true)
     {
         var walks = dbContext.Walks.Include("Difficulty").Include("Region").AsQueryable();
         
@@ -27,17 +28,29 @@ public class WalkRepository(NZWalksDbContext dbContext) : IWalkRepository
                 walks = walks.Where(x => x.Name.ToLower().Contains(filterQuery.ToLower())); 
             }
 
-            if (filterOn.Equals("description", StringComparison.OrdinalIgnoreCase))
+            else if (filterOn.Equals("description", StringComparison.OrdinalIgnoreCase))
             {
                 walks = walks.Where(x => x.Description.ToLower().Contains(filterQuery.ToLower()));
             }
 
-            if (filterOn.Equals("lengthInKm", StringComparison.OrdinalIgnoreCase))
+            else if (filterOn.Equals("lengthInKm", StringComparison.OrdinalIgnoreCase))
             {
                 if(double.TryParse(filterQuery, out var length))
                 {
                     walks = walks.Where(x => x.LengthInKm >= length);
                 }
+            }
+        }
+        //Sorting 
+        if (string.IsNullOrWhiteSpace(sortBy) == false)
+        {
+            if (sortBy.Equals("name", StringComparison.OrdinalIgnoreCase))
+            {
+                walks = isAscending ? walks.OrderBy(x => x.Name) :  walks.OrderByDescending(x => x.Name);
+            }
+            else if(sortBy.Equals("lengthInKm", StringComparison.OrdinalIgnoreCase))
+            {
+                walks = isAscending ? walks.OrderBy(x => x.LengthInKm) : walks.OrderByDescending(x => x.LengthInKm);
             }
         }
         return await walks.ToListAsync();
