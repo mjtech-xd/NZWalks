@@ -14,12 +14,16 @@ public class WalksController(IWalkRepository walkRepository, IMapper mapper) : C
     [HttpPost]
     public async Task<IActionResult> Create([FromBody] AddWalkRequestDto addWalkRequestDto)
     {
-        //Map Dto to Domain Model
-        var walkDomainModel = mapper.Map<Walk>(addWalkRequestDto);
-        await walkRepository.CreateAsync(walkDomainModel);
-        //Map Domain Model to DTO
-        var walkDto = mapper.Map<WalkDto>(walkDomainModel);
-        return Ok(walkDto);
+        if (ModelState.IsValid)
+        {
+            //Map Dto to Domain Model
+            var walkDomainModel = mapper.Map<Walk>(addWalkRequestDto);
+            await walkRepository.CreateAsync(walkDomainModel);
+            //Map Domain Model to DTO
+            var walkDto = mapper.Map<WalkDto>(walkDomainModel);
+            return Ok(walkDto);
+        }
+        return BadRequest(ModelState);
     }
     
     //Get All Walks
@@ -50,14 +54,20 @@ public class WalksController(IWalkRepository walkRepository, IMapper mapper) : C
     [Route("{id:Guid}")]
     public async Task<IActionResult> Update([FromRoute] Guid id, UpdateWalkRequestDto updateWalkRequestDto)
     {
-        //Map to domain model
-        var walkDomainModel = mapper.Map<Walk>(updateWalkRequestDto);
-        walkDomainModel = await walkRepository.UpdateAsync(id, walkDomainModel);
-        if (walkDomainModel == null)
-            return NotFound();
-        //Map Domain Model to Dto
-        var walk = mapper.Map<WalkDto>(walkDomainModel);
-        return Ok(walk);
+        if (ModelState.IsValid)
+        {
+
+            //Map to domain model
+            var walkDomainModel = mapper.Map<Walk>(updateWalkRequestDto);
+            walkDomainModel = await walkRepository.UpdateAsync(id, walkDomainModel);
+            if (walkDomainModel == null)
+                return NotFound();
+            //Map Domain Model to Dto
+            var walk = mapper.Map<WalkDto>(walkDomainModel);
+            return Ok(walk);
+        }
+
+        return BadRequest(ModelState);
 
     }
     
