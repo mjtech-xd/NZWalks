@@ -15,9 +15,33 @@ public class WalkRepository(NZWalksDbContext dbContext) : IWalkRepository
         return walk;
     }
 
-    public async Task<List<Walk>> GetAllWalkAsync()
+    public async Task<List<Walk>> GetAllWalkAsync(string? filterOn =null, string? filterQuery = null)
     {
-        return await dbContext.Walks.Include("Difficulty").Include("Region").ToListAsync();
+        var walks = dbContext.Walks.Include("Difficulty").Include("Region").AsQueryable();
+        
+        //Filtering
+        if(string.IsNullOrWhiteSpace(filterOn) == false && string.IsNullOrWhiteSpace(filterQuery) == false)
+        {
+            if(filterOn.Equals("name", StringComparison.OrdinalIgnoreCase))
+            {
+                walks = walks.Where(x => x.Name.ToLower().Contains(filterQuery.ToLower())); 
+            }
+
+            if (filterOn.Equals("description", StringComparison.OrdinalIgnoreCase))
+            {
+                walks = walks.Where(x => x.Description.ToLower().Contains(filterQuery.ToLower()));
+            }
+
+            if (filterOn.Equals("lengthInKm", StringComparison.OrdinalIgnoreCase))
+            {
+                if(double.TryParse(filterQuery, out var length))
+                {
+                    walks = walks.Where(x => x.LengthInKm >= length);
+                }
+            }
+        }
+        return await walks.ToListAsync();
+        //return await dbContext.Walks.Include("Difficulty").Include("Region").ToListAsync();
     }
 
     public async Task<Walk?> GetWalkByIdAsync(Guid id)
