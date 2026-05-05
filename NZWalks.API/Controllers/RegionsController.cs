@@ -10,11 +10,11 @@ namespace NZWalks.API.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-[Authorize]
 public class RegionsController(IRegionRepository regionRepository, IMapper mapper) : ControllerBase
 {
     //Get All Regions
     [HttpGet]
+    [Authorize(Roles ="Reader")]
     public async Task<IActionResult> GetAll()
     {
         //Get data from Database - Domain model
@@ -28,6 +28,7 @@ public class RegionsController(IRegionRepository regionRepository, IMapper mappe
     //Get Region by Id
     [HttpGet]
     [Route("{id:Guid}")]
+    [Authorize(Roles ="Reader")]
     public async Task<IActionResult> GetById([FromRoute] Guid id)
     {
         //var result = dbContext.Regions.Find(id);
@@ -44,6 +45,7 @@ public class RegionsController(IRegionRepository regionRepository, IMapper mappe
     //Create Region
     [HttpPost]
     [ValidateModel]
+    [Authorize(Roles ="Writer")]
     public async Task<IActionResult> Create([FromBody] AddRegionRequestDto addRegionRequestDto)
     {
         var regionDomainModel = mapper.Map<Region>(addRegionRequestDto);
@@ -59,6 +61,7 @@ public class RegionsController(IRegionRepository regionRepository, IMapper mappe
     [HttpPut]
     [Route("{id:Guid}")]
     [ValidateModel]
+    [Authorize(Roles ="Writer")]
     public async Task<IActionResult> UpdateRegion([FromRoute] Guid id,
         [FromBody] UpdateRegionRequestDto updateRegionRequestDto)
     {
@@ -73,6 +76,7 @@ public class RegionsController(IRegionRepository regionRepository, IMapper mappe
 
     [HttpDelete]
     [Route("{id:Guid}")]
+    [Authorize(Roles ="Writer")]
     public async Task<IActionResult> DeleteRegion([FromRoute] Guid id)
     {
         var regionDomainModel = await regionRepository.DeleteRegionAsync(id);
